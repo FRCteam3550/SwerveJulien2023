@@ -19,7 +19,7 @@
             "content": {
               "_type": "Field",
               "_source0": "network_table:///SmartDashboard/Field",
-              "_title": "/SmartDashboard/Field",
+              "_title": "Terrain",
               "_glyph": 148,
               "_showGlyph": false,
               "Game/Game": "A2023_Charged_Up",
@@ -35,8 +35,8 @@
             "content": {
               "_type": "Subsystem Layout",
               "_title": "Odométrie",
-              "_glyph": 149,
-              "_showGlyph": false,
+              "_glyph": 20,
+              "_showGlyph": true,
               "Layout/Label position": "BOTTOM",
               "_children": [
                 {
@@ -89,39 +89,68 @@
           "0,0": {
             "size": [
               1,
-              4
+              5
             ],
             "content": {
               "_type": "Subsystem Layout",
-              "_title": "Base",
-              "_glyph": 149,
-              "_showGlyph": false,
+              "_title": "Swerve",
+              "_glyph": 487,
+              "_showGlyph": true,
               "Layout/Label position": "BOTTOM",
               "_children": [
                 {
                   "_type": "Text View",
-                  "_source0": "network_table:///SmartDashboard/BaseWestcoast/positionMoteurGaucheMetres",
-                  "_title": "pos mot gauche (m)",
+                  "_source0": "network_table:///SmartDashboard/SwerveDrivetrain/angle_FL",
+                  "_title": "angle_FL",
                   "_glyph": 148,
                   "_showGlyph": false
                 },
                 {
                   "_type": "Text View",
-                  "_title": "pos mot droit (m)",
+                  "_source0": "network_table:///SmartDashboard/SwerveDrivetrain/angle_FR",
+                  "_title": "angle_FR",
                   "_glyph": 148,
                   "_showGlyph": false
                 },
                 {
                   "_type": "Text View",
-                  "_source0": "network_table:///SmartDashboard/BaseWestcoast/ajustementAngleGyro",
-                  "_title": "ajustement gyro (°)",
+                  "_source0": "network_table:///SmartDashboard/SwerveDrivetrain/angle_BL",
+                  "_title": "angle_BL",
                   "_glyph": 148,
                   "_showGlyph": false
                 },
                 {
                   "_type": "Text View",
-                  "_source0": "network_table:///SmartDashboard/BaseWestcoast/angleGyro",
-                  "_title": "angle gyro (°)",
+                  "_source0": "network_table:///SmartDashboard/SwerveDrivetrain/angle_BR",
+                  "_title": "angle_BR",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Text View",
+                  "_source0": "network_table:///SmartDashboard/SwerveDrivetrain/posDM_FL",
+                  "_title": "posDM_FL",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Text View",
+                  "_source0": "network_table:///SmartDashboard/SwerveDrivetrain/posDM_FR",
+                  "_title": "posDM_FR",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Text View",
+                  "_source0": "network_table:///SmartDashboard/SwerveDrivetrain/posDM_BL",
+                  "_title": "posDM_BL",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Text View",
+                  "_source0": "network_table:///SmartDashboard/SwerveDrivetrain/posDM_BR",
+                  "_title": "posDM_BR",
                   "_glyph": 148,
                   "_showGlyph": false
                 }
@@ -135,8 +164,8 @@
             ],
             "content": {
               "_type": "Basic Subsystem",
-              "_source0": "network_table:///SmartDashboard/BaseWestcoast",
-              "_title": "BaseWestcoast",
+              "_source0": "network_table:///SmartDashboard/SwerveDrivetrain",
+              "_title": "SwerveDrivetrain",
               "_glyph": 148,
               "_showGlyph": false
             }
@@ -162,6 +191,6 @@
     "x": -1543.199951171875,
     "y": 1200.800048828125,
     "width": 1550.4000244140625,
-    "height": 830.4000244140625
+    "height": 831.2000122070312
   }
 }

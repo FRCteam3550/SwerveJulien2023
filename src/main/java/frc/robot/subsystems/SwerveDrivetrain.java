@@ -8,9 +8,12 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.kauailabs.navx.frc.AHRS;
@@ -37,21 +40,25 @@ public class SwerveDrivetrain extends SubsystemBase {
      */
     private static final double DRIVETRAIN_WHEELBASE_METERS = DRIVETRAIN_TRACKWIDTH_METERS;
 
+    private static final int FRONT_LEFT = 0;
     private static final int FRONT_LEFT_MODULE_DRIVE_MOTOR_ID = 3;
     private static final int FRONT_LEFT_MODULE_STEER_MOTOR_ID = 7;
     private static final int FRONT_LEFT_MODULE_STEER_ENCODER_ID = 9;
     private static final double FRONT_LEFT_MODULE_STEER_OFFSET_RADIANS = -Math.toRadians(240.28);
 
+    private static final int FRONT_RIGHT = 1;
     private static final int FRONT_RIGHT_MODULE_DRIVE_MOTOR_ID = 1;
     private static final int FRONT_RIGHT_MODULE_STEER_MOTOR_ID = 5;
     private static final int FRONT_RIGHT_MODULE_STEER_ENCODER_ID = 12;
     private static final double FRONT_RIGHT_MODULE_STEER_OFFSET_RADIANS = -Math.toRadians(189.49);
 
+    private static final int BACK_LEFT = 2;
     private static final int BACK_LEFT_MODULE_DRIVE_MOTOR_ID = 2;
     private static final int BACK_LEFT_MODULE_STEER_MOTOR_ID = 8;
     private static final int BACK_LEFT_MODULE_STEER_ENCODER_ID = 11;
     private static final double BACK_LEFT_MODULE_STEER_OFFSET_RADIANS = -Math.toRadians(178.23);
 
+    private static final int BACK_RIGHT = 3;
     private static final int BACK_RIGHT_MODULE_DRIVE_MOTOR_ID = 6;
     private static final int BACK_RIGHT_MODULE_STEER_MOTOR_ID = 4;
     private static final int BACK_RIGHT_MODULE_STEER_ENCODER_ID = 0;
@@ -148,21 +155,32 @@ public class SwerveDrivetrain extends SubsystemBase {
 
   private ChassisSpeeds m_chassisSpeeds = STOP_CHASSIS_SPEEDS;
   private final XboxController m_controller;
+  // On stocke la dernière position pour la télémétrie, car c'est "cher" à aller chercher
+  // (cela requiert une requête sur le bus CAN pour tous les encodeurs)
+  private SwerveModulePosition[] m_lastPosition = {
+    new SwerveModulePosition(),
+    new SwerveModulePosition(),
+    new SwerveModulePosition(),
+    new SwerveModulePosition()
+  };
 
   public SwerveDrivetrain(XboxController controller) {
     this.m_controller = controller;
     setDefaultCommand(drive());
+    SmartDashboard.putData(this);
   }
 
   public Command drive() {
     return run(() ->
-      m_chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-        m_controller.getRightX(),
-        m_controller.getRightY(),
-        m_controller.getLeftX(),
-        getGyroscopeRotation()
+        m_chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+          m_controller.getRightX(),
+          m_controller.getRightY(),
+          m_controller.getLeftX(),
+          getGyroscopeRotation()
+        )
       )
-    ).andThen(() -> m_chassisSpeeds = STOP_CHASSIS_SPEEDS, this);
+      .andThen(() -> m_chassisSpeeds = STOP_CHASSIS_SPEEDS)
+      .withName("piloter");
   }
 
   private Rotation2d getGyroscopeRotation() {
@@ -185,6 +203,8 @@ public class SwerveDrivetrain extends SubsystemBase {
       );
     }
 
+    m_lastPosition = result;
+
     return result;
   }
 
@@ -202,5 +222,22 @@ public class SwerveDrivetrain extends SubsystemBase {
     }
 
     m_odometry.update(getGyroscopeRotation(), getModulePositions());
+  }
+
+
+  @Override
+  public void initSendable(SendableBuilder builder) {
+      super.initSendable(builder);
+
+      builder.addDoubleProperty("posDM_FL", () -> m_lastPosition[FRONT_LEFT].distanceMeters, null);
+      builder.addDoubleProperty("posDM_FR", () -> m_lastPosition[FRONT_RIGHT].distanceMeters, null);
+      builder.addDoubleProperty("posDM_BL", () -> m_lastPosition[BACK_LEFT].distanceMeters, null);
+      builder.addDoubleProperty("posDM_BR", () -> m_lastPosition[BACK_RIGHT].distanceMeters, null);
+      builder.addDoubleProperty("angle_FL", () -> m_lastPosition[FRONT_LEFT].angle.getDegrees(), null);
+      builder.addDoubleProperty("angle_FR", () -> m_lastPosition[FRONT_RIGHT].angle.getDegrees(), null);
+      builder.addDoubleProperty("angle_BL", () -> m_lastPosition[BACK_LEFT].angle.getDegrees(), null);
+      builder.addDoubleProperty("angle_BR", () -> m_lastPosition[BACK_RIGHT].angle.getDegrees(), null);
+      builder.addDoubleProperty("angleGyro", () -> getGyroscopeRotation().getDegrees(), null);
+      builder.addDoubleProperty("ajustementAngleGyro", m_navx::getAngleAdjustment, null);
   }
 }
