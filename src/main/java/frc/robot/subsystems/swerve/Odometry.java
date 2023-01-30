@@ -44,9 +44,10 @@ public class Odometry implements Sendable {
         m_robotToCamera
     );
     private final SwerveDrivePoseEstimator m_swervePoseEstimator;
-    private Pose2d m_lastCameraEstimate = new Pose2d();
+    private Pose2d m_lastEstimation = new Pose2d();
     private double m_lastCameraEstimateDistance = 0;
     private Timer m_lastCameraEstimateTime = new Timer();
+    private boolean m_enableCameraEstimation = false;
 
     public Odometry(
         Rotation2d gyroRotation,
@@ -70,38 +71,55 @@ public class Odometry implements Sendable {
             gyroRotation,
             modulePositions
         );
+
         var estimateWithoutCamera = m_swervePoseEstimator.getEstimatedPosition();
 
-        m_cameraPoseEstimator.setReferencePose(m_swervePoseEstimator.getEstimatedPosition());
-        var maybeEstimate = m_cameraPoseEstimator.update();
-        if (maybeEstimate.isPresent() && maybeEstimate.get().estimatedPose != null) {
-            var cameraEstimate = maybeEstimate.get();
-            m_swervePoseEstimator.addVisionMeasurement(cameraEstimate.estimatedPose.toPose2d(), cameraEstimate.timestampSeconds);
+        if (m_enableCameraEstimation) {
+            m_cameraPoseEstimator.setReferencePose(estimateWithoutCamera);
 
-            m_lastCameraEstimateTime.reset();
-            m_lastCameraEstimateTime.start();
-            var estimateWithCamera = m_swervePoseEstimator.getEstimatedPosition();
-            var diff = estimateWithCamera.minus(estimateWithoutCamera);
-            m_lastCameraEstimateDistance = Math.sqrt(diff.getX()*diff.getX() + diff.getY()*diff.getY());
+            var maybeEstimate = m_cameraPoseEstimator.update();
+            if (maybeEstimate.isPresent() && maybeEstimate.get().estimatedPose != null) {
+                var cameraEstimate = maybeEstimate.get();
+                m_swervePoseEstimator.addVisionMeasurement(cameraEstimate.estimatedPose.toPose2d(), cameraEstimate.timestampSeconds);
+
+                m_lastCameraEstimateTime.reset();
+                m_lastCameraEstimateTime.start();
+                var estimateWithCamera = m_swervePoseEstimator.getEstimatedPosition();
+                var diff = estimateWithCamera.minus(estimateWithoutCamera);
+                m_lastCameraEstimateDistance = Math.sqrt(diff.getX()*diff.getX() + diff.getY()*diff.getY());
+            }
+
+            m_lastEstimation = m_swervePoseEstimator.getEstimatedPosition();
+        } else {
+            m_lastEstimation = estimateWithoutCamera;
         }
 
-        m_lastCameraEstimate = m_swervePoseEstimator.getEstimatedPosition();
-        m_fieldTracker.setRobotPose(m_lastCameraEstimate);
+        m_fieldTracker.setRobotPose(m_lastEstimation);
+    }
+
+    public void activateCameraEstimation() {
+        m_enableCameraEstimation = true;
+    }
+
+
+    public void deactivateCameraEstimation() {
+        m_enableCameraEstimation = false;
     }
 
     public Pose2d getPoseM() {
-        m_lastCameraEstimate = m_swervePoseEstimator.getEstimatedPosition();
-        return m_lastCameraEstimate;
+        m_lastEstimation = m_swervePoseEstimator.getEstimatedPosition();
+        return m_lastEstimation;
     }
     
     @Override
     public void initSendable(SendableBuilder builder) {
         builder.setSmartDashboardType(getClass().getSimpleName());
-        builder.addDoubleProperty("xMetres", () -> this.m_lastCameraEstimate.getX(), null);
-        builder.addDoubleProperty("yMetres", () -> this.m_lastCameraEstimate.getY(), null);
-        builder.addDoubleProperty("angleDegres", () -> m_lastCameraEstimate.getRotation().getDegrees(), null);
+        builder.addDoubleProperty("xMetres", () -> this.m_lastEstimation.getX(), null);
+        builder.addDoubleProperty("yMetres", () -> this.m_lastEstimation.getY(), null);
+        builder.addDoubleProperty("angleDegres", () -> m_lastEstimation.getRotation().getDegrees(), null);
         builder.addDoubleProperty("diffDistance", () -> this.m_lastCameraEstimateDistance, null);
         builder.addBooleanProperty("positionSecuritaire", () -> this.m_lastCameraEstimateTime.get() < 10, null);
+        builder.addBooleanProperty("estimation camera activee", () -> this.m_enableCameraEstimation, null);
     }
 }
  

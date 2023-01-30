@@ -66,12 +66,12 @@ public class SwerveDrivetrain extends SubsystemBase implements Chassis {
 
   /**
    * The maximum voltage that will be delivered to the drive motors.
-   * <p>
+   * 
    * This can be reduced to cap the robot's maximum speed. Typically, this is useful during initial testing of the robot.
    */
   private static final double MAX_VOLTAGE = 12.0;
 
-  // FIXME Measure the drivetrain's maximum velocity or calculate the theoretical.
+  // TODO: mesurer
   //  The formula for calculating the theoretical maximum velocity is:
   //   <Motor free speed RPM> / 60 * <Drive reduction> * <Wheel diameter meters> * pi
   //  By default this value is setup for a Mk3 standard module using Falcon500s to drive.
@@ -79,13 +79,13 @@ public class SwerveDrivetrain extends SubsystemBase implements Chassis {
   //   5880.0 / 60.0 / SdsModuleConfigurations.MK4_L2.getDriveReduction() * SdsModuleConfigurations.MK4_L2.getWheelDiameter() * Math.PI
   /**
    * The maximum velocity of the robot in meters per second.
-   * <p>
+   * 
    * This is a measure of how fast the robot should be able to drive in a straight line.
    */
-  private static final double MAX_VELOCITY_MS = // Env 3.23 m/s
-    5000.0 / 60.0 *
-    SdsModuleConfigurations.MK4_L1.getDriveReduction() * // (14.0 / 50.0) * (25.0 / 19.0) * (15.0 / 45.0)
-    SdsModuleConfigurations.MK4_L1.getWheelDiameter() * Math.PI; // 0.10033
+  private static final double MAX_VELOCITY_MS = // = 3.225 m/s
+    5000.0 / 60.0 * // = 83.33 rot/s
+    SdsModuleConfigurations.MK4_L1.getDriveReduction() * // (14.0 / 50.0) * (25.0 / 19.0) * (15.0 / 45.0) = 0.1228
+    SdsModuleConfigurations.MK4_L1.getWheelDiameter() * Math.PI; // = 0.10033 * PI =  0.315196 m/rot
 
   private final SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
     // Front left
@@ -207,6 +207,14 @@ public class SwerveDrivetrain extends SubsystemBase implements Chassis {
       List.of(),
       new Pose2d(1, 0, Rotation2d.fromDegrees(0))
     );
+  }
+
+  public Command activateCameraEstimation() {
+    return runOnce(m_odometry::activateCameraEstimation);
+  }
+
+  public Command deactivateCameraEstimation() {
+    return runOnce(m_odometry::deactivateCameraEstimation);
   }
 
   public void stopMotors() {
