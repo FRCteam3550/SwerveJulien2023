@@ -21,15 +21,23 @@ public class PathFollowing {
     private static final double MAX_ACCELERATION_MS2 = 3.14; // TODO: mesurer
     private static final Pose2d ZERO_POSE = new Pose2d();
 
+    private static final double K_P_TRANS = 1;
+    private static final double K_I_TRANS = 0;
+    private static final double K_D_TRANS = 0;
+
+    private static final double K_P_ROT = 1;
+    private static final double K_I_ROT = 0;
+    private static final double K_D_ROT = 0;
+
     private final Field2d m_fieldTracker;
-    private final ProfiledPIDController theta_controller = new ProfiledPIDController(
-        1, 0, 0,
+    private final ProfiledPIDController m_theta_controller = new ProfiledPIDController(
+        K_P_ROT, K_I_ROT, K_D_ROT,
         new TrapezoidProfile.Constraints(MAX_VELOCITY_MS, MAX_ACCELERATION_MS2)
     );
     private final HolonomicDriveController m_controller = new HolonomicDriveController(
-        new PIDController(1, 0, 0), // x controller
-        new PIDController(1, 0, 0), // y controller
-        theta_controller
+        new PIDController(K_P_TRANS, K_I_TRANS, K_D_TRANS), // x controller
+        new PIDController(K_P_TRANS, K_I_TRANS, K_D_TRANS), // y controller
+        m_theta_controller
     );
     private final SwerveDriveKinematics m_kinematics;
     private final TrajectoryConfig m_trajectoryConfig;
@@ -40,11 +48,14 @@ public class PathFollowing {
         m_fieldTracker = fieldTracker;
         m_chassis = chassis;
         m_trajectoryConfig = new TrajectoryConfig( MAX_VELOCITY_MS, MAX_ACCELERATION_MS2).setKinematics(m_kinematics);
-        theta_controller.enableContinuousInput(-Math.PI, Math.PI);
+        m_theta_controller.enableContinuousInput(-Math.PI, Math.PI);
     }
 
     /**
      * Emmène le robot à la destination données, dans le référentiel du terrain.
+     * 
+     * Le robot va en parallèle du déplacement se mettre dans la bonne orientation le plus rapidement possible au début du déplacement.
+     * Voir note 2: https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/SwerveControllerCommand.html#%3Cinit%3E(edu.wpi.first.math.trajectory.Trajectory,java.util.function.Supplier,edu.wpi.first.math.kinematics.SwerveDriveKinematics,edu.wpi.first.math.controller.HolonomicDriveController,java.util.function.Consumer,edu.wpi.first.wpilibj2.command.Subsystem...)
      * @param destination une position du terrain, dans le référentiel du terrain.
      */
     public Command goTo(Pose2d destination) {
@@ -60,6 +71,9 @@ public class PathFollowing {
 
     /**
      * Déplace le robot sur une trajectoire dans le référentiel du robot. Le robot part donc de là où il est.
+     * 
+     * Le robot va en parallèle du déplacement se mettre dans la bonne orientation le plus rapidement possible au début du déplacement.
+     * Voir note 2: https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/SwerveControllerCommand.html#%3Cinit%3E(edu.wpi.first.math.trajectory.Trajectory,java.util.function.Supplier,edu.wpi.first.math.kinematics.SwerveDriveKinematics,edu.wpi.first.math.controller.HolonomicDriveController,java.util.function.Consumer,edu.wpi.first.wpilibj2.command.Subsystem...)
      * @param points Points à suivre, dans le référentiel du robot.
      * @param finalPose Position d'arrivée, toujours dans le référentiel du robot.
      */

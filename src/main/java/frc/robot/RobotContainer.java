@@ -14,14 +14,14 @@ import frc.robot.subsystems.SwerveDrivetrain;
 public class RobotContainer {
   private final XboxController m_gamepad = new XboxController(0);
   private final SwerveDrivetrain m_swerveDrive = new SwerveDrivetrain(m_gamepad);
-  private final JoystickButton navigationGreenAButton = new JoystickButton(m_gamepad, Button.kA.value);
+  private final JoystickButton m_aGreenButton = new JoystickButton(m_gamepad, Button.kA.value);
 
   public RobotContainer() {
     configureBindings();
   }
 
   private void configureBindings() {
-    navigationGreenAButton.onTrue(m_swerveDrive.zigzag());
+    m_aGreenButton.onTrue(m_swerveDrive.zigzag());
   }
 
   public Command getAutonomousCommand() {

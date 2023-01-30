@@ -36,37 +36,33 @@ public class SwerveDrivetrain extends SubsystemBase implements Chassis {
      *
      * Should be measured from center to center.
      */
-    private static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.6858;
+    private static final double TRACKWIDTH_M = 0.6858;
     /**
      * The front-to-back distance between the drivetrain wheels.
      *
      * Should be measured from center to center.
      */
-    private static final double DRIVETRAIN_WHEELBASE_METERS = DRIVETRAIN_TRACKWIDTH_METERS;
+    private static final double WHEELBASE_M = TRACKWIDTH_M;
 
-    private static final int FRONT_LEFT = 0;
     private static final int FRONT_LEFT_MODULE_DRIVE_MOTOR_ID = 3;
     private static final int FRONT_LEFT_MODULE_STEER_MOTOR_ID = 7;
     private static final int FRONT_LEFT_MODULE_STEER_ENCODER_ID = 9;
-    private static final double FRONT_LEFT_MODULE_STEER_OFFSET_RADIANS = -Math.toRadians(240.28);
+    private static final double FRONT_LEFT_MODULE_STEER_OFFSET_RAD = -Math.toRadians(240.28);
 
-    private static final int FRONT_RIGHT = 1;
     private static final int FRONT_RIGHT_MODULE_DRIVE_MOTOR_ID = 1;
     private static final int FRONT_RIGHT_MODULE_STEER_MOTOR_ID = 5;
     private static final int FRONT_RIGHT_MODULE_STEER_ENCODER_ID = 12;
-    private static final double FRONT_RIGHT_MODULE_STEER_OFFSET_RADIANS = -Math.toRadians(189.49);
+    private static final double FRONT_RIGHT_MODULE_STEER_OFFSET_RAD = -Math.toRadians(189.49);
 
-    private static final int BACK_LEFT = 2;
     private static final int BACK_LEFT_MODULE_DRIVE_MOTOR_ID = 2;
     private static final int BACK_LEFT_MODULE_STEER_MOTOR_ID = 8;
     private static final int BACK_LEFT_MODULE_STEER_ENCODER_ID = 11;
-    private static final double BACK_LEFT_MODULE_STEER_OFFSET_RADIANS = -Math.toRadians(178.23);
+    private static final double BACK_LEFT_MODULE_STEER_OFFSET_RAD = -Math.toRadians(178.23);
 
-    private static final int BACK_RIGHT = 3;
     private static final int BACK_RIGHT_MODULE_DRIVE_MOTOR_ID = 6;
     private static final int BACK_RIGHT_MODULE_STEER_MOTOR_ID = 4;
     private static final int BACK_RIGHT_MODULE_STEER_ENCODER_ID = 0;
-    private static final double BACK_RIGHT_MODULE_STEER_OFFSET_RADIANS = -Math.toRadians(36.55);
+    private static final double BACK_RIGHT_MODULE_STEER_OFFSET_RAD = -Math.toRadians(36.55);
 
   /**
    * The maximum voltage that will be delivered to the drive motors.
@@ -86,20 +82,20 @@ public class SwerveDrivetrain extends SubsystemBase implements Chassis {
    * <p>
    * This is a measure of how fast the robot should be able to drive in a straight line.
    */
-  private static final double MAX_VELOCITY_METERS_PER_SECOND = // Env 3.23 m/s
+  private static final double MAX_VELOCITY_MS = // Env 3.23 m/s
     5000.0 / 60.0 *
     SdsModuleConfigurations.MK4_L1.getDriveReduction() * // (14.0 / 50.0) * (25.0 / 19.0) * (15.0 / 45.0)
     SdsModuleConfigurations.MK4_L1.getWheelDiameter() * Math.PI; // 0.10033
 
   private final SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
     // Front left
-    new Translation2d( DRIVETRAIN_TRACKWIDTH_METERS / 2.0,  DRIVETRAIN_WHEELBASE_METERS / 2.0),
+    new Translation2d( TRACKWIDTH_M / 2.0,  WHEELBASE_M / 2.0),
     // Front right
-    new Translation2d( DRIVETRAIN_TRACKWIDTH_METERS / 2.0, -DRIVETRAIN_WHEELBASE_METERS / 2.0),
+    new Translation2d( TRACKWIDTH_M / 2.0, -WHEELBASE_M / 2.0),
     // Back left
-    new Translation2d(-DRIVETRAIN_TRACKWIDTH_METERS / 2.0,  DRIVETRAIN_WHEELBASE_METERS / 2.0),
+    new Translation2d(-TRACKWIDTH_M / 2.0,  WHEELBASE_M / 2.0),
     // Back right
-    new Translation2d(-DRIVETRAIN_TRACKWIDTH_METERS / 2.0, -DRIVETRAIN_WHEELBASE_METERS / 2.0)
+    new Translation2d(-TRACKWIDTH_M / 2.0, -WHEELBASE_M / 2.0)
   );
   private final SwerveModuleState[] m_stop_states = m_kinematics.toSwerveModuleStates(new ChassisSpeeds(0, 0, 0));
 
@@ -119,7 +115,7 @@ public class SwerveDrivetrain extends SubsystemBase implements Chassis {
       FRONT_LEFT_MODULE_DRIVE_MOTOR_ID,
       FRONT_LEFT_MODULE_STEER_MOTOR_ID,
       FRONT_LEFT_MODULE_STEER_ENCODER_ID,
-      FRONT_LEFT_MODULE_STEER_OFFSET_RADIANS
+      FRONT_LEFT_MODULE_STEER_OFFSET_RAD
     ),
     Mk4SwerveModuleHelper.createFalcon500(
       m_dashboardTab
@@ -130,7 +126,7 @@ public class SwerveDrivetrain extends SubsystemBase implements Chassis {
       FRONT_RIGHT_MODULE_DRIVE_MOTOR_ID,
       FRONT_RIGHT_MODULE_STEER_MOTOR_ID,
       FRONT_RIGHT_MODULE_STEER_ENCODER_ID,
-      FRONT_RIGHT_MODULE_STEER_OFFSET_RADIANS
+      FRONT_RIGHT_MODULE_STEER_OFFSET_RAD
     ),
     Mk4SwerveModuleHelper.createFalcon500(
       m_dashboardTab
@@ -141,7 +137,7 @@ public class SwerveDrivetrain extends SubsystemBase implements Chassis {
       BACK_LEFT_MODULE_DRIVE_MOTOR_ID,
       BACK_LEFT_MODULE_STEER_MOTOR_ID,
       BACK_LEFT_MODULE_STEER_ENCODER_ID,
-      BACK_LEFT_MODULE_STEER_OFFSET_RADIANS
+      BACK_LEFT_MODULE_STEER_OFFSET_RAD
     ),
     Mk4SwerveModuleHelper.createFalcon500(
       m_dashboardTab
@@ -152,7 +148,7 @@ public class SwerveDrivetrain extends SubsystemBase implements Chassis {
       BACK_RIGHT_MODULE_DRIVE_MOTOR_ID,
       BACK_RIGHT_MODULE_STEER_MOTOR_ID,
       BACK_RIGHT_MODULE_STEER_ENCODER_ID,
-      BACK_RIGHT_MODULE_STEER_OFFSET_RADIANS
+      BACK_RIGHT_MODULE_STEER_OFFSET_RAD
     )
   };
   private final Odometry m_odometry = new Odometry(getGyroscopeRotation(), getModulePositions(), m_kinematics, m_fieldTracker);
@@ -160,14 +156,6 @@ public class SwerveDrivetrain extends SubsystemBase implements Chassis {
   private final XboxController m_gamepad;
 
   private SwerveModuleState[] m_states = m_stop_states;
-  // On stocke la dernière position pour la télémétrie, car c'est "cher" à aller chercher
-  // (cela requiert une requête sur le bus CAN pour tous les encodeurs)
-  private SwerveModulePosition[] m_lastPosition = {
-    new SwerveModulePosition(),
-    new SwerveModulePosition(),
-    new SwerveModulePosition(),
-    new SwerveModulePosition()
-  };
   private boolean m_canUseFusedHeading = false;
 
   public SwerveDrivetrain(XboxController gamepad) {
@@ -243,8 +231,6 @@ public class SwerveDrivetrain extends SubsystemBase implements Chassis {
       );
     }
 
-    m_lastPosition = result;
-
     return result;
   }
 
@@ -255,12 +241,12 @@ public class SwerveDrivetrain extends SubsystemBase implements Chassis {
 
   @Override
   public void periodic() {
-    SwerveDriveKinematics.desaturateWheelSpeeds(m_states, MAX_VELOCITY_METERS_PER_SECOND);
+    SwerveDriveKinematics.desaturateWheelSpeeds(m_states, MAX_VELOCITY_MS);
 
     for(int i=0; i<m_modules.length; i++) {
       var moduleState = m_states[i];
       m_modules[i].set(
-        moduleState.speedMetersPerSecond / MAX_VELOCITY_METERS_PER_SECOND * MAX_VOLTAGE,
+        moduleState.speedMetersPerSecond / MAX_VELOCITY_MS * MAX_VOLTAGE,
         moduleState.angle.getRadians()
       );
     }
