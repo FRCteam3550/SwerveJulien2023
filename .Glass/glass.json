@@ -1,0 +1,33 @@
+{
+  "NetworkTables": {
+    "transitory": {
+      "SmartDashboard": {
+        "Field": {
+          "open": true
+        },
+        "SwerveDrivetrain": {
+          "open": true
+        },
+        "open": true
+      }
+    },
+    "types": {
+      "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Field": "Field2d",
+      "/SmartDashboard/SwerveDrivetrain": "Subsystem"
+    },
+    "windows": {
+      "/SmartDashboard/Field": {
+        "height": 4.400000095367432,
+        "width": 4.5,
+        "window": {
+          "visible": true
+        }
+      }
+    }
+  },
+  "NetworkTables Settings": {
+    "mode": "Disabled",
+    "serverTeam": "3550"
+  }
+}

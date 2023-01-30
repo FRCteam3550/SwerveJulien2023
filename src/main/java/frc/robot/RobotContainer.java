@@ -5,20 +5,23 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.subsystems.SwerveDrivetrain;
 
 public class RobotContainer {
-  private final XboxController m_controller = new XboxController(0);
-  private final SwerveDrivetrain m_swerveDrive = new SwerveDrivetrain(m_controller);
+  private final XboxController m_gamepad = new XboxController(0);
+  private final SwerveDrivetrain m_swerveDrive = new SwerveDrivetrain(m_gamepad);
+  private final JoystickButton navigationGreenAButton = new JoystickButton(m_gamepad, Button.kA.value);
 
   public RobotContainer() {
     configureBindings();
   }
 
   private void configureBindings() {
-
+    navigationGreenAButton.onTrue(m_swerveDrive.zigzag());
   }
 
   public Command getAutonomousCommand() {

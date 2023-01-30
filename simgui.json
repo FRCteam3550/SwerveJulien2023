@@ -1,0 +1,31 @@
+{
+  "NTProvider": {
+    "types": {
+      "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Field": "Field2d",
+      "/SmartDashboard/SwerveDrivetrain": "Subsystem"
+    }
+  },
+  "NetworkTables": {
+    "transitory": {
+      "Shuffleboard": {
+        "Drivetrain": {
+          "Back Left Module": {
+            "open": true
+          },
+          "open": true
+        },
+        "open": true
+      },
+      "SmartDashboard": {
+        "Odometrie": {
+          "open": true
+        },
+        "SwerveDrivetrain": {
+          "open": true
+        },
+        "open": true
+      }
+    }
+  }
+}
