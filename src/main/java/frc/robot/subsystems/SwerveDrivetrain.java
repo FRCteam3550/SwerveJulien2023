@@ -156,6 +156,7 @@ public class SwerveDrivetrain extends SubsystemBase implements Chassis {
   private final XboxController m_gamepad;
 
   private SwerveModuleState[] m_states = m_stop_states;
+  private ChassisSpeeds m_actualSpeeds = new ChassisSpeeds();
   private boolean m_canUseFusedHeading = false;
 
   public SwerveDrivetrain(XboxController gamepad) {
@@ -181,7 +182,7 @@ public class SwerveDrivetrain extends SubsystemBase implements Chassis {
           withDeadBand(m_gamepad.getRightX()),
           getGyroscopeRotation()
         );
-        m_states = m_kinematics.toSwerveModuleStates(chassisSpeeds);
+        setModuleStates(m_kinematics.toSwerveModuleStates(chassisSpeeds));
       })
       .andThen(this::stopMotors)
       .withName("piloter");
@@ -201,8 +202,15 @@ public class SwerveDrivetrain extends SubsystemBase implements Chassis {
     );
   }
 
+  public Command forward1MeterCommand() {
+    return m_pathFollowing.robotRelativeMove(
+      List.of(),
+      new Pose2d(1, 0, Rotation2d.fromDegrees(0))
+    );
+  }
+
   public void stopMotors() {
-    m_states = m_stop_states;
+    setModuleStates(m_stop_states);
   }
 
   public Pose2d odometryEstimation() {
@@ -239,6 +247,15 @@ public class SwerveDrivetrain extends SubsystemBase implements Chassis {
     m_states = states;
   }
 
+  private void updateActualSpeeds() {
+    var actualStates = new SwerveModuleState[4];
+    for(int i=0; i<m_modules.length; i++) {
+      var module = m_modules[i];
+      actualStates[i] = new SwerveModuleState(module.getDriveVelocity(), Rotation2d.fromRadians(module.getSteerAngle()));
+    }
+    m_actualSpeeds = m_kinematics.toChassisSpeeds(actualStates);
+  }
+
   @Override
   public void periodic() {
     SwerveDriveKinematics.desaturateWheelSpeeds(m_states, MAX_VELOCITY_MS);
@@ -251,6 +268,7 @@ public class SwerveDrivetrain extends SubsystemBase implements Chassis {
       );
     }
 
+    updateActualSpeeds();
     m_odometry.update(getGyroscopeRotation(), getModulePositions());
   }
 
@@ -258,5 +276,8 @@ public class SwerveDrivetrain extends SubsystemBase implements Chassis {
   public void initSendable(SendableBuilder builder) {
       builder.addDoubleProperty("angleGyro", () -> getGyroscopeRotation().getDegrees(), null);
       builder.addBooleanProperty("fuseHeading", () -> m_canUseFusedHeading, null);
+      builder.addDoubleProperty("actual vx (ms)", () -> m_actualSpeeds.vxMetersPerSecond, null);
+      builder.addDoubleProperty("actual vy (ms)", () -> m_actualSpeeds.vyMetersPerSecond, null);
+      builder.addDoubleProperty("actual omega (°s)", () -> Math.toDegrees(m_actualSpeeds.omegaRadiansPerSecond), null);
   }
 }

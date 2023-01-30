@@ -21,7 +21,7 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    m_aGreenButton.onTrue(m_swerveDrive.zigzag());
+    m_aGreenButton.onTrue(m_swerveDrive.forward1MeterCommand());
   }
 
   public Command getAutonomousCommand() {

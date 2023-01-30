@@ -2,7 +2,6 @@ package frc.robot.subsystems.swerve;
 
 import java.util.List;
 
-import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -14,7 +13,6 @@ import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 
 public class PathFollowing {
     private static final double MAX_VELOCITY_MS = 6.28; // TODO: mesurer
@@ -30,15 +28,13 @@ public class PathFollowing {
     private static final double K_D_ROT = 0;
 
     private final Field2d m_fieldTracker;
+    private final PIDController m_xController = new PIDController(K_P_TRANS, K_I_TRANS, K_D_TRANS);
+    private final PIDController m_yController = new PIDController(K_P_TRANS, K_I_TRANS, K_D_TRANS);
     private final ProfiledPIDController m_theta_controller = new ProfiledPIDController(
         K_P_ROT, K_I_ROT, K_D_ROT,
         new TrapezoidProfile.Constraints(MAX_VELOCITY_MS, MAX_ACCELERATION_MS2)
     );
-    private final HolonomicDriveController m_controller = new HolonomicDriveController(
-        new PIDController(K_P_TRANS, K_I_TRANS, K_D_TRANS), // x controller
-        new PIDController(K_P_TRANS, K_I_TRANS, K_D_TRANS), // y controller
-        m_theta_controller
-    );
+    private final HolonomicDriveControllerWithTelemetry m_controller = new HolonomicDriveControllerWithTelemetry(m_xController, m_yController, m_theta_controller);
     private final SwerveDriveKinematics m_kinematics;
     private final TrajectoryConfig m_trajectoryConfig;
     private final Chassis m_chassis;
@@ -93,8 +89,9 @@ public class PathFollowing {
     private Command follow(Trajectory trajectoire) {        
         return m_chassis.runOnce(() -> {
             m_fieldTracker.getObject("trajectoire").setTrajectory(trajectoire);
+            m_controller.reset();
 
-            var swerveControllerCommand = new SwerveControllerCommand(
+            var swerveControllerCommand = new SwerveControllerCommandWithTelemetry(
                 trajectoire,
                 m_chassis::odometryEstimation,
                 m_kinematics,
