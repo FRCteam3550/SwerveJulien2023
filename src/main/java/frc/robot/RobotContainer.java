@@ -15,6 +15,7 @@ public class RobotContainer {
   private final XboxController m_gamepad = new XboxController(0);
   private final SwerveDrivetrain m_swerveDrive = new SwerveDrivetrain(m_gamepad);
   private final JoystickButton m_aGreenButton = new JoystickButton(m_gamepad, Button.kA.value);
+  private final JoystickButton m_bRedButton = new JoystickButton(m_gamepad, Button.kB.value);
   private final JoystickButton m_leftRButton = new JoystickButton(m_gamepad, Button.kLeftBumper.value);
   private final JoystickButton m_rightRButton = new JoystickButton(m_gamepad, Button.kRightBumper.value);
 
@@ -24,6 +25,7 @@ public class RobotContainer {
 
   private void configureBindings() {
     m_aGreenButton.onTrue(m_swerveDrive.forward1MeterCommand());
+    m_bRedButton.onTrue(m_swerveDrive.goToFrontOfTag0());
     m_leftRButton.onTrue(m_swerveDrive.deactivateCameraEstimation());
     m_rightRButton.onTrue(m_swerveDrive.activateCameraEstimation());
   }

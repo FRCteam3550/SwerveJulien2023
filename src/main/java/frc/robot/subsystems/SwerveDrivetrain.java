@@ -177,10 +177,10 @@ public class SwerveDrivetrain extends SubsystemBase implements Chassis {
   public Command drive() {
     return run(() -> {
         var chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-          withDeadBand(-m_gamepad.getLeftX()),
+          withDeadBand(m_gamepad.getLeftX()),
           withDeadBand(-m_gamepad.getLeftY()),
-          withDeadBand(m_gamepad.getRightX()),
-          getGyroscopeRotation()
+          withDeadBand(-m_gamepad.getRightX()),
+          m_odometry.getPoseM().getRotation()
         );
         setModuleStates(m_kinematics.toSwerveModuleStates(chassisSpeeds));
       })
@@ -226,14 +226,7 @@ public class SwerveDrivetrain extends SubsystemBase implements Chassis {
   }
 
   private Rotation2d getGyroscopeRotation() {
-    if (m_navx.isMagnetometerCalibrated()) {
-      m_canUseFusedHeading = true;
-      return Rotation2d.fromDegrees(m_navx.getFusedHeading());
-    }
-
-    // We have to invert the angle of the NavX so that rotating the robot counter-clockwise makes the angle increase.
-    // Also go from [-180, 180] to [0, 360]
-    return Rotation2d.fromDegrees(180 - m_navx.getYaw());
+      return Rotation2d.fromDegrees(-m_navx.getFusedHeading());
   }
 
   private SwerveModulePosition[] getModulePositions() {
@@ -283,9 +276,9 @@ public class SwerveDrivetrain extends SubsystemBase implements Chassis {
   @Override
   public void initSendable(SendableBuilder builder) {
       builder.addDoubleProperty("angleGyro", () -> getGyroscopeRotation().getDegrees(), null);
-      builder.addBooleanProperty("fuseHeading", () -> m_canUseFusedHeading, null);
+      builder.addBooleanProperty("can use Navx fused heading", () -> m_canUseFusedHeading, null);
       builder.addDoubleProperty("actual vx (ms)", () -> m_actualSpeeds.vxMetersPerSecond, null);
       builder.addDoubleProperty("actual vy (ms)", () -> m_actualSpeeds.vyMetersPerSecond, null);
-      builder.addDoubleProperty("actual omega (°s)", () -> Math.toDegrees(m_actualSpeeds.omegaRadiansPerSecond), null);
+      builder.addDoubleProperty("actual omega (degs)", () -> Math.toDegrees(m_actualSpeeds.omegaRadiansPerSecond), null);
   }
 }

@@ -163,14 +163,14 @@ public class HolonomicDriveControllerWithTelemetry implements Sendable {
     builder.setSmartDashboardType(getClass().getSimpleName());
     
     builder.addDoubleProperty("vel ref ms", () -> m_lastLinearVelocityRef, null);
-    builder.addDoubleProperty("x ref m", m_lastRef::getX, null);
-    builder.addDoubleProperty("y ref m", m_lastRef::getY, null);
-    builder.addDoubleProperty("theta ref °", () -> m_lastRef.getRotation().getDegrees(), null);
-    builder.addDoubleProperty("vx output ms", m_lastOutput::getX, null);
-    builder.addDoubleProperty("vy output ms", m_lastOutput::getY, null);
-    builder.addDoubleProperty("omega output  °s", () -> m_lastOutput.getRotation().getDegrees(), null);
-    builder.addDoubleProperty("x actual m", m_lastActual::getX, null);
-    builder.addDoubleProperty("y actual m", m_lastActual::getY, null);
-    builder.addDoubleProperty("theta actual °", () -> m_lastActual.getRotation().getDegrees(), null);
+    builder.addDoubleProperty("x ref m", () -> m_lastRef.getX(), null);
+    builder.addDoubleProperty("y ref m", () -> m_lastRef.getY(), null);
+    builder.addDoubleProperty("theta ref deg", () -> m_lastRef.getRotation().getDegrees(), null);
+    builder.addDoubleProperty("vx output ms", () -> m_lastOutput.getX(), null);
+    builder.addDoubleProperty("vy output ms", () -> m_lastOutput.getY(), null);
+    builder.addDoubleProperty("omega output degs", () -> m_lastOutput.getRotation().getDegrees(), null);
+    builder.addDoubleProperty("x actual m", () -> m_lastActual.getX(), null);
+    builder.addDoubleProperty("y actual m", () -> m_lastActual.getY(), null);
+    builder.addDoubleProperty("theta actual deg", () -> m_lastActual.getRotation().getDegrees(), null);
   }  
 }

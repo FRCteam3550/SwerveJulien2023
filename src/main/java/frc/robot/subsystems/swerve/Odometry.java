@@ -25,27 +25,35 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Odometry implements Sendable {
     private static final Pose2d START_POSITION =  new Pose2d(2, 2, Rotation2d.fromDegrees(0));
-
-    private final Field2d m_fieldTracker;
-    private final AprilTagFieldLayout m_fieldLayout = new AprilTagFieldLayout(List.of(
-        new AprilTag(0, new Pose3d(1.73, 4.4, 0.8, new Rotation3d(0, 0, Math.toRadians(-90))))),
+    private static final AprilTag TAG0 = new AprilTag(
+        0,
+        new Pose3d(1.73, 4.4, 0.8, new Rotation3d(0, 0, Math.toRadians(-90)))
+    );
+    private static final AprilTag TAG1 = new AprilTag(
+        1,
+        new Pose3d(0.70, 4.4, 0.8, new Rotation3d(0, 0, Math.toRadians(-90)))
+    );
+    private static final AprilTagFieldLayout FIELD_LAYOUT = new AprilTagFieldLayout(
+        List.of(TAG0, TAG1),
         4.5,
         4.4
     );
     //private final AprilTagFieldLayout dispositionTerrain = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2023ChargedUp.m_resourceFile);
-    private final Transform3d m_robotToCamera = new Transform3d(
-        new Translation3d(0, 0.36, 0.335),
+    private final Transform3d ROBOT_TO_CAMERA = new Transform3d(
+        new Translation3d(0.36, 0, 0.335),
         new Rotation3d(0,0,0)
     );
+
     private final PhotonPoseEstimator m_cameraPoseEstimator = new PhotonPoseEstimator(
-        m_fieldLayout,
+        FIELD_LAYOUT,
         PoseStrategy.CLOSEST_TO_REFERENCE_POSE,
         new PhotonCamera("Microsoft_LifeCam_HD-3000"),
-        m_robotToCamera
+        ROBOT_TO_CAMERA
     );
+    private final Field2d m_fieldTracker;
     private final SwerveDrivePoseEstimator m_swervePoseEstimator;
     private Pose2d m_lastEstimation = new Pose2d();
-    private double m_lastCameraEstimateDistance = 0;
+    private double m_lastCameraDiffM = 0;
     private Timer m_lastCameraEstimateTime = new Timer();
     private boolean m_enableCameraEstimation = false;
 
@@ -63,7 +71,8 @@ public class Odometry implements Sendable {
         m_lastCameraEstimateTime.reset();
         m_lastCameraEstimateTime.start();
 
-        m_fieldTracker.getObject("aprilTag0").setPose(m_fieldLayout.getTagPose(0).get().toPose2d());
+        m_fieldTracker.getObject("aprilTag0").setPose(TAG0.pose.toPose2d());
+        m_fieldTracker.getObject("aprilTag1").setPose(TAG1.pose.toPose2d());
     }
 
     public void update(Rotation2d gyroRotation, SwerveModulePosition[] modulePositions) {
@@ -76,17 +85,16 @@ public class Odometry implements Sendable {
 
         if (m_enableCameraEstimation) {
             m_cameraPoseEstimator.setReferencePose(estimateWithoutCamera);
-
             var maybeEstimate = m_cameraPoseEstimator.update();
+
             if (maybeEstimate.isPresent() && maybeEstimate.get().estimatedPose != null) {
                 var cameraEstimate = maybeEstimate.get();
                 m_swervePoseEstimator.addVisionMeasurement(cameraEstimate.estimatedPose.toPose2d(), cameraEstimate.timestampSeconds);
 
                 m_lastCameraEstimateTime.reset();
-                m_lastCameraEstimateTime.start();
                 var estimateWithCamera = m_swervePoseEstimator.getEstimatedPosition();
                 var diff = estimateWithCamera.minus(estimateWithoutCamera);
-                m_lastCameraEstimateDistance = Math.sqrt(diff.getX()*diff.getX() + diff.getY()*diff.getY());
+                m_lastCameraDiffM = Math.sqrt(diff.getX()*diff.getX() + diff.getY()*diff.getY());
             }
 
             m_lastEstimation = m_swervePoseEstimator.getEstimatedPosition();
@@ -99,6 +107,7 @@ public class Odometry implements Sendable {
 
     public void activateCameraEstimation() {
         m_enableCameraEstimation = true;
+        System.out.println("Camera activee.");
     }
 
 
@@ -114,10 +123,11 @@ public class Odometry implements Sendable {
     @Override
     public void initSendable(SendableBuilder builder) {
         builder.setSmartDashboardType(getClass().getSimpleName());
+
         builder.addDoubleProperty("xMetres", () -> this.m_lastEstimation.getX(), null);
         builder.addDoubleProperty("yMetres", () -> this.m_lastEstimation.getY(), null);
         builder.addDoubleProperty("angleDegres", () -> m_lastEstimation.getRotation().getDegrees(), null);
-        builder.addDoubleProperty("diffDistance", () -> this.m_lastCameraEstimateDistance, null);
+        builder.addDoubleProperty("diffDistance", () -> this.m_lastCameraDiffM, null);
         builder.addBooleanProperty("positionSecuritaire", () -> this.m_lastCameraEstimateTime.get() < 10, null);
         builder.addBooleanProperty("estimation camera activee", () -> this.m_enableCameraEstimation, null);
     }

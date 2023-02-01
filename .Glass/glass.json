@@ -4,11 +4,13 @@
       "Shuffleboard": {
         "Drivetrain": {
           "open": true
-        },
-        "open": true
+        }
       },
       "SmartDashboard": {
         "Odometrie": {
+          "open": true
+        },
+        "Swerve Controller": {
           "open": true
         },
         "SwerveDrivetrain": {
@@ -36,6 +38,11 @@
     "windows": {
       "/SmartDashboard/Field": {
         "height": 4.400000095367432,
+        "trajectoire": {
+          "arrows": false,
+          "selectable": false,
+          "style": "Line"
+        },
         "width": 4.5,
         "window": {
           "visible": true
@@ -205,7 +212,7 @@
               "autoFit": true
             }
           ],
-          "height": 332,
+          "height": 260,
           "name": "X (m)",
           "series": [
             {
@@ -229,7 +236,7 @@
               "name": "ref"
             }
           ],
-          "viewTime": 6.0
+          "viewTime": 30.0
         },
         {
           "axis": [
@@ -237,7 +244,7 @@
               "autoFit": true
             }
           ],
-          "height": 332,
+          "height": 260,
           "name": "Y (m)",
           "series": [
             {
@@ -261,7 +268,7 @@
               "name": "ref"
             }
           ],
-          "viewTime": 6.0
+          "viewTime": 30.0
         },
         {
           "axis": [
@@ -269,7 +276,7 @@
               "autoFit": true
             }
           ],
-          "height": 332,
+          "height": 260,
           "name": "Theta (°)",
           "series": [
             {
@@ -279,7 +286,7 @@
                 0.6901960968971252,
                 1.0
               ],
-              "id": "NT:/SmartDashboard/Swerve Controller/theta actual °",
+              "id": "NT:/SmartDashboard/Swerve Controller/theta actual deg",
               "name": "actual"
             },
             {
@@ -289,11 +296,11 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/SmartDashboard/Swerve Controller/theta ref °",
+              "id": "NT:/SmartDashboard/Swerve Controller/theta ref deg",
               "name": "ref"
             }
           ],
-          "viewTime": 6.0
+          "viewTime": 30.0
         }
       ],
       "window": {
@@ -308,7 +315,7 @@
               "autoFit": true
             }
           ],
-          "height": 332,
+          "height": 261,
           "name": "VX (m/s)",
           "series": [
             {
@@ -332,7 +339,7 @@
               "name": "output"
             }
           ],
-          "viewTime": 6.0
+          "viewTime": 30.0
         },
         {
           "axis": [
@@ -340,7 +347,7 @@
               "autoFit": true
             }
           ],
-          "height": 332,
+          "height": 261,
           "name": "VY (m/s)",
           "series": [
             {
@@ -364,7 +371,7 @@
               "name": "output"
             }
           ],
-          "viewTime": 6.0
+          "viewTime": 30.0
         },
         {
           "axis": [
@@ -372,7 +379,7 @@
               "autoFit": true
             }
           ],
-          "height": 332,
+          "height": 261,
           "name": "Omega (°/s)",
           "series": [
             {
@@ -382,8 +389,8 @@
                 0.6901960968971252,
                 1.0
               ],
-              "id": "NT:/SmartDashboard/SwerveDrivetrain/actual omega (°s)",
-              "name": "actual"
+              "id": "NT:/SmartDashboard/SwerveDrivetrain/actual omega (degs)",
+              "name": "acual"
             },
             {
               "color": [
@@ -392,11 +399,11 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/SmartDashboard/Swerve Controller/omega output  °s",
+              "id": "NT:/SmartDashboard/Swerve Controller/omega output degs",
               "name": "output"
             }
           ],
-          "viewTime": 6.0
+          "viewTime": 30.0
         }
       ],
       "window": {

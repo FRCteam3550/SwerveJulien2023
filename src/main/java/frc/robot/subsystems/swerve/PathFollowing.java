@@ -55,14 +55,20 @@ public class PathFollowing {
      * @param destination une position du terrain, dans le référentiel du terrain.
      */
     public Command goTo(Pose2d destination) {
-        var fieldRelativeTrajectory = TrajectoryGenerator.generateTrajectory(
-            m_chassis.odometryEstimation(),  // On part de là où on est
-            List.of(), // Aucun point intermédiaire: on va directement à la destination
-            destination,
-            m_trajectoryConfig
-        );
+        return m_chassis.runOnce(() -> {
+            var start = m_chassis.odometryEstimation();
+            System.out.println(String.format("START: %.2d %.2d", start.getX(), start.getY()));
+            var fieldRelativeTrajectory = TrajectoryGenerator.generateTrajectory(
+                start,  // On part de là où on est
+                List.of(), // Aucun point intermédiaire: on va directement à la destination
+                destination,
+                m_trajectoryConfig
+            );
+            var trajStart = fieldRelativeTrajectory.getInitialPose();
+            System.out.println(String.format("TRAJ START: %.2d %.2d", trajStart.getX(), trajStart.getY()));
 
-        return follow(fieldRelativeTrajectory);
+            follow(fieldRelativeTrajectory);
+        });
     }
 
     /**
@@ -74,36 +80,36 @@ public class PathFollowing {
      * @param finalPose Position d'arrivée, toujours dans le référentiel du robot.
      */
     public Command robotRelativeMove(List<Translation2d> points, Pose2d finalPose) {
-        var robotRelativeTrajectory = TrajectoryGenerator.generateTrajectory(
-            ZERO_POSE, // Dans le référentiel du robot, le point de départ, càd là où es le robot, est par définition à (0, 0)
-            points,
-            finalPose,
-            m_trajectoryConfig
-        );
-        var robotToField = m_chassis.odometryEstimation().minus(ZERO_POSE);
-        var fieldRelativeTrajectory = robotRelativeTrajectory.transformBy(robotToField);
+        return m_chassis.runOnce(() -> {
+            var robotRelativeTrajectory = TrajectoryGenerator.generateTrajectory(
+                ZERO_POSE, // Dans le référentiel du robot, le point de départ, càd là où es le robot, est par définition à (0, 0)
+                points,
+                finalPose,
+                m_trajectoryConfig
+            );
+            var robotToField = m_chassis.odometryEstimation().minus(ZERO_POSE);
+            var fieldRelativeTrajectory = robotRelativeTrajectory.transformBy(robotToField);
 
-        return follow(fieldRelativeTrajectory);
+            follow(fieldRelativeTrajectory);
+        });
     }
 
-    private Command follow(Trajectory trajectoire) {        
-        return m_chassis.runOnce(() -> {
-            m_fieldTracker.getObject("trajectoire").setTrajectory(trajectoire);
-            m_controller.reset();
+    private void follow(Trajectory trajectoire) {        
+        m_fieldTracker.getObject("trajectoire").setTrajectory(trajectoire);
+        m_controller.reset();
 
-            var swerveControllerCommand = new SwerveControllerCommandWithTelemetry(
-                trajectoire,
-                m_chassis::odometryEstimation,
-                m_kinematics,
-                m_controller,
-                m_chassis::setModuleStates,
-                m_chassis
-            );
+        var swerveControllerCommand = new SwerveControllerCommandWithTelemetry(
+            trajectoire,
+            m_chassis::odometryEstimation,
+            m_kinematics,
+            m_controller,
+            m_chassis::setModuleStates,
+            m_chassis
+        );
 
-            swerveControllerCommand
-                .andThen(m_chassis::stopMotors)
-                .withName("trajectoireAuto")
-                .schedule();
-        });
+        swerveControllerCommand
+            .andThen(m_chassis::stopMotors)
+            .withName("trajectoireAuto")
+            .schedule();;
     }        
 }
