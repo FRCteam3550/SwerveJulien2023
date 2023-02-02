@@ -23,6 +23,9 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+/*
+ * Gère tous les aspects de l'odométrie pour la base Swerve.
+ */
 public class Odometry implements Sendable {
     private static final Pose2d START_POSITION =  new Pose2d(2, 2, Rotation2d.fromDegrees(0));
     private static final AprilTag TAG0 = new AprilTag(
@@ -38,7 +41,7 @@ public class Odometry implements Sendable {
         4.5,
         4.4
     );
-    //private final AprilTagFieldLayout dispositionTerrain = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2023ChargedUp.m_resourceFile);
+
     private final Transform3d ROBOT_TO_CAMERA = new Transform3d(
         new Translation3d(0.36, 0, 0.335),
         new Rotation3d(0,0,0)
