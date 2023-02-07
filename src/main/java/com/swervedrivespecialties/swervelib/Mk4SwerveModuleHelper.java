@@ -1,5 +1,6 @@
 package com.swervedrivespecialties.swervelib;
 
+import com.swervedrivespecialties.ModuleConfigurationProvider;
 import com.swervedrivespecialties.swervelib.ctre.*;
 import com.swervedrivespecialties.swervelib.rev.NeoDriveControllerFactoryBuilder;
 import com.swervedrivespecialties.swervelib.rev.NeoSteerConfiguration;
@@ -60,7 +61,7 @@ public final class Mk4SwerveModuleHelper {
     public static SwerveModule createFalcon500(
             ShuffleboardLayout container,
             Mk4ModuleConfiguration configuration,
-            GearRatio gearRatio,
+            ModuleConfigurationProvider gearRatio,
             int driveMotorPort,
             int steerMotorPort,
             int steerEncoderPort,
@@ -94,7 +95,7 @@ public final class Mk4SwerveModuleHelper {
      */
     public static SwerveModule createFalcon500(
             ShuffleboardLayout container,
-            GearRatio gearRatio,
+            ModuleConfigurationProvider gearRatio,
             int driveMotorPort,
             int steerMotorPort,
             int steerEncoderPort,
@@ -116,7 +117,7 @@ public final class Mk4SwerveModuleHelper {
      */
     public static SwerveModule createFalcon500(
             Mk4ModuleConfiguration configuration,
-            GearRatio gearRatio,
+            ModuleConfigurationProvider gearRatio,
             int driveMotorPort,
             int steerMotorPort,
             int steerEncoderPort,
@@ -146,7 +147,7 @@ public final class Mk4SwerveModuleHelper {
      * @return The configured swerve module.
      */
     public static SwerveModule createFalcon500(
-            GearRatio gearRatio,
+        ModuleConfigurationProvider gearRatio,
             int driveMotorPort,
             int steerMotorPort,
             int steerEncoderPort,
@@ -171,7 +172,7 @@ public final class Mk4SwerveModuleHelper {
     public static SwerveModule createNeo(
             ShuffleboardLayout container,
             Mk4ModuleConfiguration configuration,
-            GearRatio gearRatio,
+            ModuleConfigurationProvider gearRatio,
             int driveMotorPort,
             int steerMotorPort,
             int steerEncoderPort,
@@ -205,7 +206,7 @@ public final class Mk4SwerveModuleHelper {
      */
     public static SwerveModule createNeo(
             ShuffleboardLayout container,
-            GearRatio gearRatio,
+            ModuleConfigurationProvider gearRatio,
             int driveMotorPort,
             int steerMotorPort,
             int steerEncoderPort,
@@ -227,7 +228,7 @@ public final class Mk4SwerveModuleHelper {
      */
     public static SwerveModule createNeo(
             Mk4ModuleConfiguration configuration,
-            GearRatio gearRatio,
+            ModuleConfigurationProvider gearRatio,
             int driveMotorPort,
             int steerMotorPort,
             int steerEncoderPort,
@@ -257,7 +258,7 @@ public final class Mk4SwerveModuleHelper {
      * @return The configured swerve module.
      */
     public static SwerveModule createNeo(
-            GearRatio gearRatio,
+            ModuleConfigurationProvider gearRatio,
             int driveMotorPort,
             int steerMotorPort,
             int steerEncoderPort,
@@ -282,7 +283,7 @@ public final class Mk4SwerveModuleHelper {
     public static SwerveModule createFalcon500Neo(
             ShuffleboardLayout container,
             Mk4ModuleConfiguration configuration,
-            GearRatio gearRatio,
+            ModuleConfigurationProvider gearRatio,
             int driveMotorPort,
             int steerMotorPort,
             int steerEncoderPort,
@@ -316,7 +317,7 @@ public final class Mk4SwerveModuleHelper {
      */
     public static SwerveModule createFalcon500Neo(
             ShuffleboardLayout container,
-            GearRatio gearRatio,
+            ModuleConfigurationProvider gearRatio,
             int driveMotorPort,
             int steerMotorPort,
             int steerEncoderPort,
@@ -338,7 +339,7 @@ public final class Mk4SwerveModuleHelper {
      */
     public static SwerveModule createFalcon500Neo(
             Mk4ModuleConfiguration configuration,
-            GearRatio gearRatio,
+            ModuleConfigurationProvider gearRatio,
             int driveMotorPort,
             int steerMotorPort,
             int steerEncoderPort,
@@ -368,7 +369,7 @@ public final class Mk4SwerveModuleHelper {
      * @return The configured swerve module.
      */
     public static SwerveModule createFalcon500Neo(
-            GearRatio gearRatio,
+            ModuleConfigurationProvider gearRatio,
             int driveMotorPort,
             int steerMotorPort,
             int steerEncoderPort,
@@ -393,7 +394,7 @@ public final class Mk4SwerveModuleHelper {
     public static SwerveModule createNeoFalcon500(
             ShuffleboardLayout container,
             Mk4ModuleConfiguration configuration,
-            GearRatio gearRatio,
+            ModuleConfigurationProvider gearRatio,
             int driveMotorPort,
             int steerMotorPort,
             int steerEncoderPort,
@@ -427,7 +428,7 @@ public final class Mk4SwerveModuleHelper {
      */
     public static SwerveModule createNeoFalcon500(
             ShuffleboardLayout container,
-            GearRatio gearRatio,
+            ModuleConfigurationProvider gearRatio,
             int driveMotorPort,
             int steerMotorPort,
             int steerEncoderPort,
@@ -449,7 +450,7 @@ public final class Mk4SwerveModuleHelper {
      */
     public static SwerveModule createNeoFalcon500(
             Mk4ModuleConfiguration configuration,
-            GearRatio gearRatio,
+            ModuleConfigurationProvider gearRatio,
             int driveMotorPort,
             int steerMotorPort,
             int steerEncoderPort,
@@ -488,7 +489,7 @@ public final class Mk4SwerveModuleHelper {
         return createNeoFalcon500(new Mk4ModuleConfiguration(), gearRatio, driveMotorPort, steerMotorPort, steerEncoderPort, steerOffset);
     }
 
-    public enum GearRatio {
+    public enum GearRatio implements ModuleConfigurationProvider {
         L1(SdsModuleConfigurations.MK4_L1),
         L2(SdsModuleConfigurations.MK4_L2),
         L3(SdsModuleConfigurations.MK4_L3),
@@ -503,5 +504,22 @@ public final class Mk4SwerveModuleHelper {
         public ModuleConfiguration getConfiguration() {
             return configuration;
         }
+
+        public ModuleConfigurationProvider withWheelDiameter(double wheelDiameter) {
+            return new ModuleConfigurationProvider() {
+                private final ModuleConfiguration m_config = new ModuleConfiguration(
+                    wheelDiameter,
+                    configuration.getDriveReduction(),
+                    configuration.isDriveInverted(),
+                    configuration.getSteerReduction(),
+                    configuration.isSteerInverted()
+                );
+
+                @Override
+                public ModuleConfiguration getConfiguration() {
+                    return m_config;
+                }
+            };
+        }    
     }
 }

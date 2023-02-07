@@ -2,7 +2,6 @@ package frc.robot.subsystems;
 
 import java.util.List;
 
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -18,8 +17,10 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import com.kauailabs.navx.frc.AHRS;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
+import com.kauailabs.navx.frc.AHRS;
+import com.swervedrivespecialties.ModuleConfigurationProvider;
 import com.swervedrivespecialties.swervelib.Mk4SwerveModuleHelper;
 import com.swervedrivespecialties.swervelib.SdsModuleConfigurations;
 import com.swervedrivespecialties.swervelib.SwerveModule;
@@ -87,6 +88,9 @@ public class SwerveDrivetrain extends SubsystemBase implements Chassis {
     SdsModuleConfigurations.MK4_L1.getDriveReduction() * // (14.0 / 50.0) * (25.0 / 19.0) * (15.0 / 45.0) = 0.1228
     SdsModuleConfigurations.MK4_L1.getWheelDiameter() * Math.PI; // = 0.10033 * PI =  0.315196 m/rot
 
+  //valeur intiale:0.10033 -- 0.3085 est la distance par tour mesuree.  
+  private static final ModuleConfigurationProvider GEAR_RATIO = Mk4SwerveModuleHelper.GearRatio.L1.withWheelDiameter(0.3085 / Math.PI);
+
   private final SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
     // Front left
     new Translation2d( TRACKWIDTH_M / 2.0,  WHEELBASE_M / 2.0),
@@ -111,7 +115,7 @@ public class SwerveDrivetrain extends SubsystemBase implements Chassis {
         .getLayout("Front Left Module", BuiltInLayouts.kList)
         .withSize(2, 4)
         .withPosition(0, 0),
-      Mk4SwerveModuleHelper.GearRatio.L1,
+      GEAR_RATIO,
       FRONT_LEFT_MODULE_DRIVE_MOTOR_ID,
       FRONT_LEFT_MODULE_STEER_MOTOR_ID,
       FRONT_LEFT_MODULE_STEER_ENCODER_ID,
@@ -122,7 +126,7 @@ public class SwerveDrivetrain extends SubsystemBase implements Chassis {
         .getLayout("Front Right Module", BuiltInLayouts.kList)
         .withSize(2, 4)
         .withPosition(2, 0),
-      Mk4SwerveModuleHelper.GearRatio.L1,
+      GEAR_RATIO,
       FRONT_RIGHT_MODULE_DRIVE_MOTOR_ID,
       FRONT_RIGHT_MODULE_STEER_MOTOR_ID,
       FRONT_RIGHT_MODULE_STEER_ENCODER_ID,
@@ -133,7 +137,7 @@ public class SwerveDrivetrain extends SubsystemBase implements Chassis {
         .getLayout("Back Left Module", BuiltInLayouts.kList)
         .withSize(2, 4)
         .withPosition(4, 0),
-      Mk4SwerveModuleHelper.GearRatio.L1,
+      GEAR_RATIO,
       BACK_LEFT_MODULE_DRIVE_MOTOR_ID,
       BACK_LEFT_MODULE_STEER_MOTOR_ID,
       BACK_LEFT_MODULE_STEER_ENCODER_ID,
@@ -144,7 +148,7 @@ public class SwerveDrivetrain extends SubsystemBase implements Chassis {
         .getLayout("Back Right Module", BuiltInLayouts.kList)
         .withSize(2, 4)
         .withPosition(6, 0),
-      Mk4SwerveModuleHelper.GearRatio.L1,
+      GEAR_RATIO,
       BACK_RIGHT_MODULE_DRIVE_MOTOR_ID,
       BACK_RIGHT_MODULE_STEER_MOTOR_ID,
       BACK_RIGHT_MODULE_STEER_ENCODER_ID,
@@ -153,13 +157,13 @@ public class SwerveDrivetrain extends SubsystemBase implements Chassis {
   };
   private final Odometry m_odometry = new Odometry(getGyroscopeRotation(), getModulePositions(), m_kinematics, m_fieldTracker);
   private final PathFollowing m_pathFollowing = new PathFollowing(this, m_kinematics, m_fieldTracker);
-  private final XboxController m_gamepad;
+  private final CommandXboxController m_gamepad;
 
   private SwerveModuleState[] m_states = m_stop_states;
   private ChassisSpeeds m_actualSpeeds = new ChassisSpeeds();
   private boolean m_canUseFusedHeading = false;
 
-  public SwerveDrivetrain(XboxController gamepad) {
+  public SwerveDrivetrain(CommandXboxController gamepad) {
     this.m_gamepad = gamepad;
     setDefaultCommand(drive());
     SmartDashboard.putData(this);
@@ -215,6 +219,14 @@ public class SwerveDrivetrain extends SubsystemBase implements Chassis {
 
   public Command deactivateCameraEstimation() {
     return runOnce(m_odometry::deactivateCameraEstimation);
+  }
+
+  public Command incrementCameraLatencyCompensation() {
+    return runOnce(m_odometry::incrementLatencyCompensation);
+  }
+
+  public Command decrementCameraLatencyCompensation() {
+    return runOnce(m_odometry::decrementLatencyCompensation);
   }
 
   public void stopMotors() {

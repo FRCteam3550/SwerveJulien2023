@@ -57,16 +57,14 @@ public class PathFollowing {
     public Command goTo(Pose2d destination) {
         return m_chassis.runOnce(() -> {
             var start = m_chassis.odometryEstimation();
-            System.out.println(String.format("START: %.2d %.2d", start.getX(), start.getY()));
+
             var fieldRelativeTrajectory = TrajectoryGenerator.generateTrajectory(
                 start,  // On part de là où on est
                 List.of(), // Aucun point intermédiaire: on va directement à la destination
                 destination,
                 m_trajectoryConfig
             );
-            var trajStart = fieldRelativeTrajectory.getInitialPose();
-            System.out.println(String.format("TRAJ START: %.2d %.2d", trajStart.getX(), trajStart.getY()));
-
+            
             follow(fieldRelativeTrajectory);
         });
     }

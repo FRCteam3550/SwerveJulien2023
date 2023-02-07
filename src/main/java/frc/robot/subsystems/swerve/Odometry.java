@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * Gère tous les aspects de l'odométrie pour la base Swerve.
  */
 public class Odometry implements Sendable {
+    private static double LATENCY_COMPENSATION_INCREMENT = 0.001; // 1ms
     private static final Pose2d START_POSITION =  new Pose2d(2, 2, Rotation2d.fromDegrees(0));
     private static final AprilTag TAG0 = new AprilTag(
         0,
@@ -59,6 +60,7 @@ public class Odometry implements Sendable {
     private double m_lastCameraDiffM = 0;
     private Timer m_lastCameraEstimateTime = new Timer();
     private boolean m_enableCameraEstimation = false;
+    private double m_latency_compensation = 0.001; // 1ms
 
     public Odometry(
         Rotation2d gyroRotation,
@@ -92,7 +94,7 @@ public class Odometry implements Sendable {
 
             if (maybeEstimate.isPresent() && maybeEstimate.get().estimatedPose != null) {
                 var cameraEstimate = maybeEstimate.get();
-                m_swervePoseEstimator.addVisionMeasurement(cameraEstimate.estimatedPose.toPose2d(), cameraEstimate.timestampSeconds);
+                m_swervePoseEstimator.addVisionMeasurement(cameraEstimate.estimatedPose.toPose2d(), cameraEstimate.timestampSeconds + m_latency_compensation);
 
                 m_lastCameraEstimateTime.reset();
                 var estimateWithCamera = m_swervePoseEstimator.getEstimatedPosition();
@@ -118,6 +120,15 @@ public class Odometry implements Sendable {
         m_enableCameraEstimation = false;
     }
 
+    public void incrementLatencyCompensation() {
+        m_latency_compensation += LATENCY_COMPENSATION_INCREMENT;
+    }
+
+
+    public void decrementLatencyCompensation() {
+        m_latency_compensation -= LATENCY_COMPENSATION_INCREMENT;
+    }
+
     public Pose2d getPoseM() {
         m_lastEstimation = m_swervePoseEstimator.getEstimatedPosition();
         return m_lastEstimation;
@@ -133,6 +144,7 @@ public class Odometry implements Sendable {
         builder.addDoubleProperty("diffDistance", () -> this.m_lastCameraDiffM, null);
         builder.addBooleanProperty("positionSecuritaire", () -> this.m_lastCameraEstimateTime.get() < 10, null);
         builder.addBooleanProperty("estimation camera activee", () -> this.m_enableCameraEstimation, null);
+        builder.addDoubleProperty("compensation latence", () -> this.m_latency_compensation, null);
     }
 }
  

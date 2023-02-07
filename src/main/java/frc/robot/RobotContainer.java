@@ -4,30 +4,27 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.SwerveDrivetrain;
 
 public class RobotContainer {
-  private final XboxController m_gamepad = new XboxController(0);
+  private final CommandXboxController m_gamepad = new CommandXboxController(0);
   private final SwerveDrivetrain m_swerveDrive = new SwerveDrivetrain(m_gamepad);
-  private final JoystickButton m_aGreenButton = new JoystickButton(m_gamepad, Button.kA.value);
-  private final JoystickButton m_bRedButton = new JoystickButton(m_gamepad, Button.kB.value);
-  private final JoystickButton m_leftRButton = new JoystickButton(m_gamepad, Button.kLeftBumper.value);
-  private final JoystickButton m_rightRButton = new JoystickButton(m_gamepad, Button.kRightBumper.value);
 
   public RobotContainer() {
     configureBindings();
   }
 
   private void configureBindings() {
-    m_aGreenButton.onTrue(m_swerveDrive.forward1MeterCommand());
-    m_bRedButton.onTrue(m_swerveDrive.goToFrontOfTag0());
-    m_leftRButton.onTrue(m_swerveDrive.deactivateCameraEstimation());
-    m_rightRButton.onTrue(m_swerveDrive.activateCameraEstimation());
+    m_gamepad.a().onTrue(m_swerveDrive.forward1MeterCommand());
+    m_gamepad.b().onTrue(m_swerveDrive.goToFrontOfTag0());
+    m_gamepad.x().onTrue(m_swerveDrive.decrementCameraLatencyCompensation());
+    m_gamepad.y().onTrue(m_swerveDrive.incrementCameraLatencyCompensation());
+    m_gamepad.leftBumper().onTrue(m_swerveDrive.deactivateCameraEstimation());
+    m_gamepad.rightBumper().onTrue(m_swerveDrive.activateCameraEstimation());
+
   }
 
   public Command getAutonomousCommand() {
