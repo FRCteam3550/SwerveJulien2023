@@ -217,6 +217,14 @@ public class SwerveDrivetrain extends SubsystemBase implements Chassis {
     return runOnce(m_odometry::deactivateCameraEstimation);
   }
 
+  public Command incrementCameraLatencyCompensation() {
+    return runOnce(m_odometry::incrementLatencyCompensation);
+  }
+
+  public Command decrementCameraLatencyCompensation() {
+    return runOnce(m_odometry::decrementLatencyCompensation);
+  }
+  
   public void stopMotors() {
     setModuleStates(m_stop_states);
   }
