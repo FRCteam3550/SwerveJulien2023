@@ -18,20 +18,18 @@ public class RobotContainer {
   private final JoystickButton m_bRedButton = new JoystickButton(m_gamepad, Button.kB.value);
   private final JoystickButton m_xButton = new JoystickButton(m_gamepad, Button.kX.value);
   private final JoystickButton m_yButton = new JoystickButton(m_gamepad, Button.kY.value);
-  private final JoystickButton m_leftRButton = new JoystickButton(m_gamepad, Button.kLeftBumper.value);
-  private final JoystickButton m_rightRButton = new JoystickButton(m_gamepad, Button.kRightBumper.value);
+  private final JoystickButton m_startButton = new JoystickButton(m_gamepad, Button.kStart.value);
 
   public RobotContainer() {
     configureBindings();
   }
 
   private void configureBindings() {
-    m_aGreenButton.onTrue(m_swerveDrive.forward1MeterCommand());
-    m_bRedButton.onTrue(m_swerveDrive.goToFrontOfTag0());
-    m_leftRButton.onTrue(m_swerveDrive.deactivateCameraEstimation());
-    m_rightRButton.onTrue(m_swerveDrive.activateCameraEstimation());
-    m_xButton.onTrue(m_swerveDrive.decrementCameraLatencyCompensation());
-    m_yButton.onTrue(m_swerveDrive.incrementCameraLatencyCompensation());
+    m_aGreenButton.onTrue(m_swerveDrive.stopRecording());
+    m_bRedButton.onTrue(m_swerveDrive.startRecording());
+    m_startButton.onTrue(m_swerveDrive.play());
+    m_xButton.onTrue(m_swerveDrive.forward1MeterCommand());
+    m_yButton.onTrue(m_swerveDrive.goToFrontOfTag0());
   }
 
   public Command getAutonomousCommand() {

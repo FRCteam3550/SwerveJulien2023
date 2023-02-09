@@ -24,8 +24,10 @@ import com.swervedrivespecialties.swervelib.Mk4SwerveModuleHelper;
 import com.swervedrivespecialties.swervelib.SdsModuleConfigurations;
 import com.swervedrivespecialties.swervelib.SwerveModule;
 import frc.robot.subsystems.swerve.Chassis;
+import frc.robot.subsystems.swerve.JoystickInputs;
 import frc.robot.subsystems.swerve.Odometry;
 import frc.robot.subsystems.swerve.PathFollowing;
+import frc.robot.subsystems.swerve.Replay;
 import frc.robot.utils.Navx;
 
 public class SwerveDrivetrain extends SubsystemBase implements Chassis {
@@ -154,6 +156,7 @@ public class SwerveDrivetrain extends SubsystemBase implements Chassis {
   private final Odometry m_odometry = new Odometry(getGyroscopeRotation(), getModulePositions(), m_kinematics, m_fieldTracker);
   private final PathFollowing m_pathFollowing = new PathFollowing(this, m_kinematics, m_fieldTracker);
   private final XboxController m_gamepad;
+  private final Replay m_replay = new Replay();
 
   private SwerveModuleState[] m_states = m_stop_states;
   private ChassisSpeeds m_actualSpeeds = new ChassisSpeeds();
@@ -166,7 +169,19 @@ public class SwerveDrivetrain extends SubsystemBase implements Chassis {
     SmartDashboard.putData(m_fieldTracker);
   }
 
-  private double withDeadBand(double setPoint) {
+  public Command drive() {
+    return run(() -> {
+        var inputs = getJoystickInputs();
+        if (m_replay.isRecording()) {
+          m_replay.record(inputs);
+        }
+        applyJoystickInputs(inputs);
+      })
+      .andThen(this::stopMotors)
+      .withName("piloter");
+  }
+
+  private double adjustAxisInput(double setPoint) {
     final var epsilon = 0.05;
     if (Math.abs(setPoint) < epsilon) {
       return 0.0;
@@ -174,18 +189,22 @@ public class SwerveDrivetrain extends SubsystemBase implements Chassis {
     return setPoint;
   }
 
-  public Command drive() {
-    return run(() -> {
-        var chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-          withDeadBand(m_gamepad.getLeftX()),
-          withDeadBand(-m_gamepad.getLeftY()),
-          withDeadBand(-m_gamepad.getRightX()),
-          m_odometry.getPoseM().getRotation()
-        );
-        setModuleStates(m_kinematics.toSwerveModuleStates(chassisSpeeds));
-      })
-      .andThen(this::stopMotors)
-      .withName("piloter");
+  private JoystickInputs getJoystickInputs() {
+    return new JoystickInputs(
+      adjustAxisInput(m_gamepad.getLeftX()),
+      adjustAxisInput(-m_gamepad.getLeftY()),
+      adjustAxisInput(-m_gamepad.getRightX())
+    );
+  }
+
+  private void applyJoystickInputs(JoystickInputs inputs) {
+    var chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+      inputs.x,
+      inputs.y,
+      inputs.rot,
+      m_odometry.getPoseM().getRotation()
+    );
+    setModuleStates(m_kinematics.toSwerveModuleStates(chassisSpeeds));
   }
 
   public Command goToFrontOfTag0() {
@@ -209,20 +228,24 @@ public class SwerveDrivetrain extends SubsystemBase implements Chassis {
     );
   }
 
-  public Command activateCameraEstimation() {
-    return runOnce(m_odometry::activateCameraEstimation);
+  public Command startRecording() {
+    return runOnce(m_replay::startRecording);
   }
 
-  public Command deactivateCameraEstimation() {
-    return runOnce(m_odometry::deactivateCameraEstimation);
+  public Command stopRecording() {
+    return runOnce(m_replay::stopRecording);
   }
 
-  public Command incrementCameraLatencyCompensation() {
-    return runOnce(m_odometry::incrementLatencyCompensation);
-  }
-
-  public Command decrementCameraLatencyCompensation() {
-    return runOnce(m_odometry::decrementLatencyCompensation);
+  public Command play() {
+    return 
+      runOnce(m_replay::startPlaying)
+      .andThen(run(() -> {
+        var inputs = m_replay.play();
+        if (inputs.isPresent()) {
+          applyJoystickInputs(inputs.get());
+        }
+      }))
+      .until(m_replay::playIsFinished);
   }
   
   public void stopMotors() {

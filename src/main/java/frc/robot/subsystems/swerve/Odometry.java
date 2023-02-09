@@ -27,7 +27,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * Gère tous les aspects de l'odométrie pour la base Swerve.
  */
 public class Odometry implements Sendable {
-    private static double LATENCY_COMPENSATION_INCREMENT = 0.001; // 1ms
     private static final Pose2d START_POSITION =  new Pose2d(2, 2, Rotation2d.fromDegrees(0));
     private static final AprilTag TAG0 = new AprilTag(
         0,
@@ -59,8 +58,8 @@ public class Odometry implements Sendable {
     private Pose2d m_lastEstimation = new Pose2d();
     private double m_lastCameraDiffM = 0;
     private Timer m_lastCameraEstimateTime = new Timer();
-    private boolean m_enableCameraEstimation = false;
-    private double m_latency_compensation = -0.020; // 1ms
+    private boolean m_enableCameraEstimation = true;
+    private double m_latency_compensation = -0.035; // 35ms
 
     public Odometry(
         Rotation2d gyroRotation,
@@ -110,24 +109,6 @@ public class Odometry implements Sendable {
         m_fieldTracker.setRobotPose(m_lastEstimation);
     }
 
-    public void activateCameraEstimation() {
-        m_enableCameraEstimation = true;
-        System.out.println("Camera activee.");
-    }
-
-
-    public void deactivateCameraEstimation() {
-        m_enableCameraEstimation = false;
-    }
-
-    public void incrementLatencyCompensation() {
-        m_latency_compensation += LATENCY_COMPENSATION_INCREMENT;
-    }
-
-    public void decrementLatencyCompensation() {
-        m_latency_compensation -= LATENCY_COMPENSATION_INCREMENT;
-    }
-
     public Pose2d getPoseM() {
         m_lastEstimation = m_swervePoseEstimator.getEstimatedPosition();
         return m_lastEstimation;
@@ -137,13 +118,13 @@ public class Odometry implements Sendable {
     public void initSendable(SendableBuilder builder) {
         builder.setSmartDashboardType(getClass().getSimpleName());
 
-        builder.addDoubleProperty("xMetres", () -> this.m_lastEstimation.getX(), null);
-        builder.addDoubleProperty("yMetres", () -> this.m_lastEstimation.getY(), null);
+        builder.addDoubleProperty("xMetres", () -> m_lastEstimation.getX(), null);
+        builder.addDoubleProperty("yMetres", () -> m_lastEstimation.getY(), null);
         builder.addDoubleProperty("angleDegres", () -> m_lastEstimation.getRotation().getDegrees(), null);
-        builder.addDoubleProperty("diffDistance", () -> this.m_lastCameraDiffM, null);
-        builder.addBooleanProperty("positionSecuritaire", () -> this.m_lastCameraEstimateTime.get() < 10, null);
-        builder.addBooleanProperty("estimation camera activee", () -> this.m_enableCameraEstimation, null);
-        builder.addDoubleProperty("compensation latence", () -> this.m_latency_compensation, null);
+        builder.addDoubleProperty("diffDistance", () -> m_lastCameraDiffM, null);
+        builder.addBooleanProperty("positionSecuritaire", () -> m_lastCameraEstimateTime.get() < 10, null);
+        builder.addBooleanProperty("estimation camera activee", () -> m_enableCameraEstimation, (val) -> m_enableCameraEstimation = val);
+        builder.addDoubleProperty("compensation latence", () -> m_latency_compensation, (val) -> m_latency_compensation = val);
     }
 }
  
