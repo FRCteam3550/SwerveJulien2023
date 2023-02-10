@@ -28,6 +28,7 @@ public class Replay implements Sendable {
     }
 
     public void startRecording() {
+        System.out.println("Start recording...");
         recorder = TimedLog.startRecording(name);
     }
 
@@ -36,11 +37,13 @@ public class Replay implements Sendable {
     }
 
     public void stopRecording() {
+        System.out.println("Stop recording...");
         recorder.save();
         recorder = null;
     }
 
     public void startPlaying() {
+        System.out.println("Start playing...");
         reader = TimedLog.startReadingLast(name);
     }
 
@@ -56,6 +59,8 @@ public class Replay implements Sendable {
 
     @Override
     public void initSendable(SendableBuilder builder) {
+        builder.addBooleanProperty("is recording", this::isRecording, null);
+        builder.addBooleanProperty("play is finished", this::playIsFinished, null);
         builder.addStringProperty("name", () -> name, (val) -> name = val);
     }
 }

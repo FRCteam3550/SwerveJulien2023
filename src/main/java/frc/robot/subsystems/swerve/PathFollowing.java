@@ -19,11 +19,11 @@ public class PathFollowing {
     private static final double MAX_ACCELERATION_MS2 = 3.14; // TODO: mesurer
     private static final Pose2d ZERO_POSE = new Pose2d();
 
-    private static final double K_P_TRANS = 1;
+    private static final double K_P_TRANS = 6;
     private static final double K_I_TRANS = 0;
     private static final double K_D_TRANS = 0;
 
-    private static final double K_P_ROT = 1;
+    private static final double K_P_ROT = 4;
     private static final double K_I_ROT = 0;
     private static final double K_D_ROT = 0;
 
@@ -57,15 +57,13 @@ public class PathFollowing {
     public Command goTo(Pose2d destination) {
         return m_chassis.runOnce(() -> {
             var start = m_chassis.odometryEstimation();
-            System.out.println(String.format("START: %.2d %.2d", start.getX(), start.getY()));
+
             var fieldRelativeTrajectory = TrajectoryGenerator.generateTrajectory(
                 start,  // On part de là où on est
                 List.of(), // Aucun point intermédiaire: on va directement à la destination
                 destination,
                 m_trajectoryConfig
             );
-            var trajStart = fieldRelativeTrajectory.getInitialPose();
-            System.out.println(String.format("TRAJ START: %.2d %.2d", trajStart.getX(), trajStart.getY()));
 
             follow(fieldRelativeTrajectory);
         });
