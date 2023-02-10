@@ -25,11 +25,11 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    m_aGreenButton.onTrue(m_swerveDrive.stopRecording());
-    m_bRedButton.onTrue(m_swerveDrive.startRecording());
-    m_startButton.onTrue(m_swerveDrive.play()); 
-    m_xButton.onTrue(m_swerveDrive.forward1MeterCommand());
-    m_yButton.onTrue(m_swerveDrive.goToFrontOfTag0());
+    // m_aGreenButton.onTrue(m_swerveDrive.stopRecording());
+    // m_bRedButton.onTrue(m_swerveDrive.startRecording());
+    // m_startButton.onTrue(m_swerveDrive.play()); 
+    // m_xButton.onTrue(m_swerveDrive.forward1MeterCommand());
+    // m_yButton.onTrue(m_swerveDrive.goToFrontOfTag0());
   }
 
   public Command getAutonomousCommand() {
