@@ -24,7 +24,7 @@ import edu.wpi.first.wpilibj.Timer;
 
 public class TimedLog implements LogReader, LogRecorder {
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss");
-    private static final String DIRECTORY = Filesystem.getDeployDirectory().getAbsolutePath();
+    private static final String DIRECTORY = Filesystem.getOperatingDirectory().getAbsolutePath();
     private final String name;
     private final Timer timer = new Timer();
     private List<TimedLogEntry> entries = new ArrayList<>();
