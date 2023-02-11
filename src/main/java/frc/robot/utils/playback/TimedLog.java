@@ -19,12 +19,15 @@ import java.util.StringJoiner;
 import java.util.stream.Stream;
 
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Timer;
 
+/**
+ * Représente un enregistrement de données numériques horodatées.
+ * 
+ * Ce peut être utilisé à des fins d'analyse, ou à des fins d'enregistrement et de replay de mouvements du robot.
+ */
 public class TimedLog implements LogReader, LogRecorder {
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss");
-    private static final String DIRECTORY = Filesystem.getOperatingDirectory().getAbsolutePath();
     private final String name;
     private final Timer timer = new Timer();
     private List<TimedLogEntry> entries = new ArrayList<>();
@@ -41,21 +44,36 @@ public class TimedLog implements LogReader, LogRecorder {
         timer.start();
     }
 
+    /**
+     * Crée un nouvel enregistrement vide et retourne un objet permettant d'y ajouter des entrées.
+     * @param name le nom expliquant le but de ce journal. Par exemple, pour un journal enregistrant
+     * une séquence de mouvements automatique, le nom de la séquence de mouvements.
+     * @return un enregistreur pour un nouveau journal horodaté.
+     */
     public static LogRecorder startRecording(String name) {
         return new TimedLog(name);
     }
 
     /**
      * Enregistre les infos avec le temps écoulé depuis le début de l'enregistrement.
-     * Le temps écoulé commence avec le premier enregistrement d'infos.
-     * @param data
+     * Le temps écoulé commence lorsque l'on appelle la méthode startRecording().
+     * @param data Les données que l'on souhaite enregistrer pour le moment courant.
      */
     public void recordLogEntry(double... data) {
         entries.add(new TimedLogEntry(timer.get(), data));
     }
 
     /**
-     * Retourne la donnée pour le temps qui s'est écoulé depuis resetPlay(), ou rien si la lecture est terminée.
+     * Déclenche la minuterie pour lire le journal.
+     */
+    public void startReading() {
+        timer.reset();
+        timer.start();
+        currentLogEntry = 0;
+    }
+
+    /**
+     * Retourne les données du journal pour le moment courant, ou rien si la lecture est terminée.
      */
     public Optional<double[]> readLogEntry() {
         var elapsedTimeSeconds = timer.get();
@@ -71,12 +89,12 @@ public class TimedLog implements LogReader, LogRecorder {
 
     private File saveFile() {
         var fileName = String.format("%s_%s.csv", name, DATE_FORMAT.format(new Date()));
-        return Path.of(DIRECTORY, fileName).toFile();
+        return Path.of(LoadDirectory.Home.path, fileName).toFile();
     }
 
     /**
-     * Sauve l'enregistrement dans un fichier dont le nom est l'assemblage du nom du log et de la date.
-     * Le répertoire est le répertoire de déploiement.
+     * Sauve le journal sur fichier. Le répertoire est toujours le répertoire de l'utilisateur courant sur le robot.
+     * Le nom sera une combinaison du nom du journal et de la date d'enregistrement.
      */
     public void save() {
         var file = saveFile();
@@ -100,10 +118,10 @@ public class TimedLog implements LogReader, LogRecorder {
     }
 
     /**
-     * Charge l'enregistrement avec le nom de fichier donné, à partir du répertoire de déploiement.
+     * Charge un enregistrement à relire à partir du répertoire donné, avec le nom de fichier donné.
      */
-    public static LogReader startReading(String fileName) {
-        var file = Path.of(DIRECTORY, fileName).toFile();
+    public static LogReader loadFromFile(LoadDirectory dir, String fileName) {
+        var file = Path.of(dir.path, fileName).toFile();
 
         try (var scanner = new Scanner(new FileReader(file))) {
             var result = new ArrayList<TimedLogEntry>();
@@ -127,14 +145,14 @@ public class TimedLog implements LogReader, LogRecorder {
     }
 
     /**
-     * Charge le dernier enregistrement avec le nom donné, à partir du répertoire de déploiement.
+     * Charge le dernier journal enregistré avec le nom donné, à partir du répertoire donné.
      */
-    public static LogReader startReadingLast(String name) {
+    public static LogReader loadLastFileForName(LoadDirectory dir, String name) {
         var prefix = name + "_";
 
         try {
             var files = Files
-                .walk(Path.of(DIRECTORY))
+                .walk(Path.of(dir.path))
                 .map((f) -> f.getFileName().toString())
                 .filter((f) -> f.startsWith(prefix) && f.endsWith(".csv"))
                 .sorted()
@@ -144,10 +162,10 @@ public class TimedLog implements LogReader, LogRecorder {
             }
 
             var lastFile = files.get(files.size() - 1);
-            return startReading(lastFile);
+            return loadFromFile(dir, lastFile);
         }
         catch (IOException ioe) {
-            throw new RuntimeException(String.format("Impossible de trouver un enregistrement avec le nom %s dans %s", name, DIRECTORY), ioe);
+            throw new RuntimeException(String.format("Impossible de trouver un enregistrement avec le nom %s dans %s", name, dir.path), ioe);
         }
     }
 }
