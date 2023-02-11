@@ -113,6 +113,14 @@ public class Odometry implements Sendable {
         m_lastEstimation = m_swervePoseEstimator.getEstimatedPosition();
         return m_lastEstimation;
     }
+
+    public void activateCameraOdometry() {
+        m_enableCameraEstimation = true;
+    }
+
+    public void deactivateCameraOdometry() {
+        m_enableCameraEstimation = false;
+    }
     
     @Override
     public void initSendable(SendableBuilder builder) {

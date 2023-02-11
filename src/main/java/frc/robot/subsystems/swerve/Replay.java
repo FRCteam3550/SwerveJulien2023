@@ -6,14 +6,17 @@ import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.utils.playback.LoadDirectory;
 import frc.robot.utils.playback.LogReader;
 import frc.robot.utils.playback.LogRecorder;
 import frc.robot.utils.playback.TimedLog;
 
 public class Replay implements Sendable {
+    private static final LoadDirectory DIRECTORY = LoadDirectory.Home;
     private static final int X = 0;
     private static final int Y = 1;
     private static final int ROT = 2;
+
     private String name = "auto1";
     private LogRecorder recorder;
     private LogReader reader;
@@ -32,7 +35,7 @@ public class Replay implements Sendable {
         recorder = TimedLog.startRecording(name);
     }
 
-    public void record(JoystickInputs inputs) {
+    public void record(GamepadInputs inputs) {
         recorder.recordLogEntry(inputs.x, inputs.y, inputs.rot);
     }
 
@@ -44,17 +47,18 @@ public class Replay implements Sendable {
 
     public void startPlaying() {
         System.out.println("Start playing...");
-        reader = TimedLog.startReadingLast(name);
+        reader = TimedLog.loadLastFileForName(DIRECTORY, name);
+        reader.startReading();
     }
 
-    public Optional<JoystickInputs> play() {
+    public Optional<GamepadInputs> nextInputsToPlay() {
         return reader
             .readLogEntry()
-            .map((data) -> new JoystickInputs(data[X], data[Y], data[ROT]));
+            .map((data) -> new GamepadInputs(data[X], data[Y], data[ROT]));
     }
 
     public boolean playIsFinished() {
-        return reader == null || play().isEmpty();
+        return reader == null || nextInputsToPlay().isEmpty();
     }
 
     @Override
