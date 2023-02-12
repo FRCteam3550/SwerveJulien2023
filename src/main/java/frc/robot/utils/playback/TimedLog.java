@@ -23,8 +23,60 @@ import edu.wpi.first.wpilibj.Timer;
 
 /**
  * Représente un enregistrement de données numériques horodatées.
- * 
+ * <p>
  * Ce peut être utilisé à des fins d'analyse, ou à des fins d'enregistrement et de replay de mouvements du robot.
+ * </p>
+ * <p>
+ * Les fichiers sont enregistrés dans le répertoire {@link  edu.wpi.first.wpilibj.Filesystem#getOperatingDirectory  operatingDirectory}. Ils peuvent être chargé à partir du même répertoire, ou du répertoire de {@link  edu.wpi.first.wpilibj.Filesystem#getDeployDirectory  déploiement}.
+ * </p>
+ * <p>
+ * Exemple d'enregistrement:
+ * </p>
+ * 
+ * <pre>
+ * 
+ * private XBoxController gamepad;
+ * private DifferentialDrive drive;
+ * private LogRecorder recorder;
+ * 
+ * &#64;Override
+ * public void teleopInit() {
+ *   recorder = TimedLog.startRecording("autoMove1");
+ * }
+ * 
+ * &#64;Override
+ * public void teleopPeriodic() {
+ *   recorder.recordLogEntry(gamepad.getLeftX(), gamepad.getLeftY());
+ *   drive.arcadeDrive(gamepad.getLeftX(), gamepad.getLeftY());
+ * }
+ * 
+ * </pre>
+ *
+ * <p>
+ * Exemple de replay:
+ * </p>
+ * 
+ * <pre>
+ * 
+ * private DifferentialDrive drive;
+ * private LogReader reader;
+ * 
+ * &#64;Override
+ * public void teleopInit() {
+ *   reader = TimedLog.loadLastFileForName(LoadDirectory.Home, "autoMove1");
+ *   reader.startReading();
+ * }
+ * 
+ * &#64;Override
+ * public void teleopPeriodic() {
+ *   var toReplay = reader.readLogEntry();
+ *   if (toReplay.isPresent()) {
+ *     var inputs = toReplay.get();
+ *     drive.arcadeDrive(inputs[0], inputs[1]);
+ *   }
+ * }
+ * 
+ * </pre>
  */
 public class TimedLog implements LogReader, LogRecorder {
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss");
@@ -56,7 +108,7 @@ public class TimedLog implements LogReader, LogRecorder {
 
     /**
      * Enregistre les infos avec le temps écoulé depuis le début de l'enregistrement.
-     * Le temps écoulé commence lorsque l'on appelle la méthode startRecording().
+     * Le temps écoulé commence lorsque l'on appelle la méthode {@link  #startRecording  startRecording}.
      * @param data Les données que l'on souhaite enregistrer pour le moment courant.
      */
     public void recordLogEntry(double... data) {
